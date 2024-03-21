@@ -16,12 +16,8 @@ from io import BytesIO
 import base64
 
 
-local = st.sidebar.checkbox("Local mode", True)
 
-if local:
-    openai_api_key = os.environ["OPENAI_API_KEY"]
-else:
-    openai_api_key = st.sidebar.text_input("ENTER YOUR OPENAI_API_KEY, see here for more info: https://platform.openai.com/docs/quickstart?context=python")
+openai_api_key = st.sidebar.text_input("ENTER YOUR OPENAI_API_KEY, see here for more info: https://platform.openai.com/docs/quickstart?context=python")
     
 client = OpenAI(api_key=openai_api_key)
 
