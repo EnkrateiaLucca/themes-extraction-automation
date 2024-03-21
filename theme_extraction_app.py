@@ -18,8 +18,6 @@ import base64
 
 
 openai_api_key = st.sidebar.text_input("ENTER YOUR OPENAI_API_KEY, see here for more info: https://platform.openai.com/docs/quickstart?context=python")
-    
-client = OpenAI(api_key=openai_api_key)
 
 def get_response(prompt_question):
     response = client.chat.completions.create(
@@ -155,53 +153,55 @@ class Theme(BaseModel):
 # 2) Introduce additional parameters to take context into account (e.g., include metadata
 #    about the document from which the text was extracted.)
 
+if not openai_api_key:
+    client = OpenAI(api_key=openai_api_key)
 
 
-st.title("GPT-Theme-Extractor app")
+    st.title("GPT-Theme-Extractor app")
 
-st.header("GPT-Theme-Extractor app")
-
-
-model = st.sidebar.selectbox("Select a model", get_model_tags())
-
-system_prompt = st.sidebar.text_area("System prompt", "You are an expert extraction algorithm for design themes from pdf presentations.\
-            Only extract relevant information from the pdf output that relates to the creation of the appropriate alias object for styling a page.\
-            You will never return a null value for any section. If you do not know the value of an attribute asked to extract,\
-            return the best option for the context for that attribute's value.")
-
-pdfpath = st.text_input("Enter the path to the PDF file (related to root folder in the app github)")
-
-if pdfpath:
-
-    llm = ChatOpenAI(model=model, temperature=0)
-
-    output_parser = JsonOutputParser(pydantic_object=Theme)
-
-    format_instructions = output_parser.get_format_instructions()
-
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                system_prompt
-            ),
-            # Please see the how-to about improving performance with
-            # reference examples.
-            # MessagesPlaceholder('examples'),
-            ("human", "{text}"),
-        ],
-    )
-
-    runnable = prompt | llm.with_structured_output(schema=Theme)
+    st.header("GPT-Theme-Extractor app")
 
 
-    pdf_raw_contents = st.text_area("PDF raw contents (you can edit)", extract_pdf_raw_contents(pdfpath))
+    model = st.sidebar.selectbox("Select a model", get_model_tags())
 
-    if st.button("Extract theme"):
-        output = runnable.invoke({"text": pdf_raw_contents})
-        output_json = output.json()
-        st.json(output_json)
-        if st.button("Save theme to file"):
-            with open('alias-style.json', 'w+') as f:
-                json.dump(output_json, f)
-    
+    system_prompt = st.sidebar.text_area("System prompt", "You are an expert extraction algorithm for design themes from pdf presentations.\
+                Only extract relevant information from the pdf output that relates to the creation of the appropriate alias object for styling a page.\
+                You will never return a null value for any section. If you do not know the value of an attribute asked to extract,\
+                return the best option for the context for that attribute's value.")
+
+    pdfpath = st.text_input("Enter the path to the PDF file (related to root folder in the app github)")
+
+    if pdfpath:
+
+        llm = ChatOpenAI(model=model, temperature=0)
+
+        output_parser = JsonOutputParser(pydantic_object=Theme)
+
+        format_instructions = output_parser.get_format_instructions()
+
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    system_prompt
+                ),
+                # Please see the how-to about improving performance with
+                # reference examples.
+                # MessagesPlaceholder('examples'),
+                ("human", "{text}"),
+            ],
+        )
+
+        runnable = prompt | llm.with_structured_output(schema=Theme)
+
+
+        pdf_raw_contents = st.text_area("PDF raw contents (you can edit)", extract_pdf_raw_contents(pdfpath))
+
+        if st.button("Extract theme"):
+            output = runnable.invoke({"text": pdf_raw_contents})
+            output_json = output.json()
+            st.json(output_json)
+            if st.button("Save theme to file"):
+                with open('alias-style.json', 'w+') as f:
+                    json.dump(output_json, f)
+        
