@@ -153,7 +153,7 @@ class Theme(BaseModel):
 # 2) Introduce additional parameters to take context into account (e.g., include metadata
 #    about the document from which the text was extracted.)
 
-if not openai_api_key:
+if openai_api_key!="":
     client = OpenAI(api_key=openai_api_key)
 
 
